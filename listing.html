@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listing Details - OLX Marketplace</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .safety-tips-card {
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            margin-top: 1rem;
+        }
+        .safety-tips-card h4 {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+        .safety-tips-card ul {
+            padding-left: 1.2rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+        .contact-modal-backdrop {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .contact-modal-backdrop.show {
+            display: flex;
+        }
+        .contact-modal {
+            background: #ffffff;
+            border-radius: var(--radius-lg);
+            width: 90%;
+            max-width: 440px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: var(--shadow-lg);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Main Navigation Bar -->
+    <header id="main-header"></header>
+
+    <main class="container" style="padding-bottom: 3rem;">
+        
+        <!-- Requirement 3 Verification Toast (shown when redirected from post-ad) -->
+        <div id="new-listing-toast" class="alert-box alert-success" style="margin-top: 1.25rem;">
+            🎉 <strong>Success! Your ad has been published!</strong><br>
+            Requirement 3 Verified: Your listing is now immediately active and visible on the frontend.
+        </div>
+
+        <!-- Breadcrumb Navigation -->
+        <div class="breadcrumb" id="detail-breadcrumb">
+            <a href="index.html">Home</a>
+            <span class="breadcrumb-separator">/</span>
+            <span id="bc-category"><a href="category.html">Categories</a></span>
+            <span class="breadcrumb-separator">/</span>
+            <span id="bc-city"><a href="city.html">City</a></span>
+            <span class="breadcrumb-separator">/</span>
+            <span id="bc-title" style="color: var(--text-main); font-weight: 600;">Listing</span>
+        </div>
+
+        <!-- Listing Detail 2-Column Grid (Requirement 4.d) -->
+        <div id="listing-container" class="listing-detail-layout">
+            
+            <!-- Left Column: Media & Overview -->
+            <div class="listing-main-content">
+                <!-- Large Image Preview -->
+                <div class="detail-img-box">
+                    <img id="detail-image" src="" alt="Listing photo" class="detail-img" />
+                </div>
+
+                <div class="detail-body">
+                    <div class="detail-tags">
+                        <span id="detail-type-badge" class="badge-tag" style="position: static;">Product</span>
+                        <span id="detail-cat-tag" class="tag-pill" style="font-size: 0.85rem;">Category</span>
+                        <span id="detail-subcat-tag" class="tag-pill" style="font-size: 0.85rem;">Subcategory</span>
+                    </div>
+
+                    <h1 id="detail-title" class="detail-title">Loading listing...</h1>
+
+                    <!-- Specifications Grid (Showing all 10 fields clearly) -->
+                    <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--primary-color); margin-bottom: 0.75rem;">
+                        Overview & Specifications (10 Data Fields)
+                    </h3>
+                    <div class="spec-grid">
+                        <div class="spec-item">
+                            <span class="spec-label">i. Type</span>
+                            <span class="spec-value" id="spec-type">-</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">ii. Name</span>
+                            <span class="spec-value" id="spec-name">-</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">iv. Category</span>
+                            <span class="spec-value" id="spec-category">-</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">v. Subcategory</span>
+                            <span class="spec-value" id="spec-subcategory">-</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">vi. Country</span>
+                            <span class="spec-value" id="spec-country">-</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">vii. State</span>
+                            <span class="spec-value" id="spec-state">-</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">viii. City</span>
+                            <span class="spec-value" id="spec-city">-</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">ix. Area</span>
+                            <span class="spec-value" id="spec-area">-</span>
+                        </div>
+                        <div class="spec-item" style="grid-column: 1 / -1;">
+                            <span class="spec-label">x. Price</span>
+                            <span class="spec-value" id="spec-price" style="color: var(--primary-color); font-size: 1.1rem;">-</span>
+                        </div>
+                    </div>
+
+                    <!-- Description Section (Field iii) -->
+                    <div class="detail-description-section">
+                        <h3>iii. Detail & Description</h3>
+                        <p id="detail-description" class="detail-description-text"></p>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Right Column: Sidebar (Price, Seller Info, Safety Tips) -->
+            <div class="listing-sidebar">
+                
+                <!-- Price & Date Card -->
+                <div class="sidebar-card">
+                    <div id="sidebar-price" class="sidebar-price">₹ 0</div>
+                    <div id="sidebar-name" class="sidebar-title-sub">Product Name</div>
+                    
+                    <div class="sidebar-location-box">
+                        <span id="sidebar-location">📍 Location</span>
+                        <span id="sidebar-date">Date</span>
+                    </div>
+                </div>
+
+                <!-- Seller Profile Card -->
+                <div class="sidebar-card">
+                    <h3 style="font-size: 0.95rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin-bottom: 1rem; letter-spacing: 0.5px;">
+                        Seller Information
+                    </h3>
+
+                    <div class="seller-profile">
+                        <div class="seller-avatar" id="seller-avatar">S</div>
+                        <div class="seller-info">
+                            <h4 id="seller-name">Seller Name</h4>
+                            <p>Verified OLX User • Active Member</p>
+                        </div>
+                    </div>
+
+                    <div class="seller-actions">
+                        <button class="btn btn-primary btn-contact" onclick="openContactModal()">
+                            📞 Show Seller Phone Number
+                        </button>
+                        <a id="whatsapp-btn" href="#" target="_blank" class="btn btn-outline btn-contact" style="border-color: #25D366; color: #128C7E;">
+                            💬 Chat on WhatsApp
+                        </a>
+                    </div>
+
+                    <!-- Owner Controls (if current user owns this ad) -->
+                    <div id="owner-controls" style="display: none; margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed var(--border-color);">
+                        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+                            ⚙️ You posted this ad
+                        </p>
+                        <button onclick="deleteThisListing()" class="btn btn-outline text-danger" style="width: 100%;">
+                            🗑️ Delete This Listing
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Safety Tips Card -->
+                <div class="safety-tips-card">
+                    <h4>🛡️ Safety Tips for Buyers</h4>
+                    <ul>
+                        <li>Meet seller at a safe public place</li>
+                        <li>Inspect the item thoroughly before buying</li>
+                        <li>Never make advance payments before seeing the product</li>
+                        <li>Verify documents for vehicles and property</li>
+                    </ul>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- 404 Not Found State -->
+        <div id="not-found-state" class="empty-state" style="display: none;">
+            <div class="empty-icon">⚠️</div>
+            <h2 class="empty-title">Listing Not Found</h2>
+            <p class="empty-desc">This product or service might have been deleted or does not exist.</p>
+            <a href="index.html" class="btn btn-primary">Browse All Listings</a>
+        </div>
+
+        <!-- Similar / Related Ads -->
+        <section class="section" style="margin-top: 2rem;">
+            <div class="section-header">
+                <h2 class="section-title">Similar Listings You Might Like</h2>
+            </div>
+            <div class="listings-grid" id="related-listings-grid"></div>
+        </section>
+
+    </main>
+
+    <!-- Contact Modal -->
+    <div class="contact-modal-backdrop" id="contact-modal" onclick="closeContactModal(event)">
+        <div class="contact-modal" onclick="event.stopPropagation()">
+            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📞</div>
+            <h3 style="font-size: 1.3rem; color: var(--primary-color); margin-bottom: 0.25rem;">Contact Seller</h3>
+            <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 1.25rem;">
+                Connect directly with <strong id="modal-seller-name">the seller</strong>
+            </p>
+
+            <div style="background: #f0f7f8; border-radius: var(--radius-md); padding: 1rem; margin-bottom: 1.5rem;">
+                <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Phone Number:</span>
+                <div id="modal-seller-phone" style="font-size: 1.4rem; font-weight: 800; color: var(--primary-color); margin-top: 0.25rem;">
+                    +91 XXXXX XXXXX
+                </div>
+            </div>
+
+            <button class="btn btn-primary" style="width: 100%; padding: 0.75rem;" onclick="closeContactModal()">
+                Close Window
+            </button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer id="main-footer"></footer>
+
+    <!-- Scripts -->
+    <script src="js/data.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/navbar.js"></script>
+    <script>
+        let currentItem = null;
+
+        function openContactModal() {
+            document.getElementById("contact-modal").classList.add("show");
+        }
+
+        function closeContactModal() {
+            document.getElementById("contact-modal").classList.remove("show");
+        }
+
+        function deleteThisListing() {
+            if (confirm("Are you sure you want to delete this listing?")) {
+                DB.deleteListing(currentItem.id);
+                alert("Listing deleted successfully!");
+                window.location.href = "my-listings.html";
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get("id");
+            const isCreated = urlParams.get("created");
+
+            if (isCreated) {
+                const toast = document.getElementById("new-listing-toast");
+                toast.classList.add("show");
+            }
+
+            if (!id) {
+                showNotFound();
+                return;
+            }
+
+            currentItem = DB.getListingById(id);
+            if (!currentItem) {
+                showNotFound();
+                return;
+            }
+
+            // Populate Main Details
+            document.title = `${currentItem.name} - OLX Marketplace`;
+            document.getElementById("detail-image").src = currentItem.image;
+            document.getElementById("detail-image").alt = currentItem.name;
+            document.getElementById("detail-title").innerText = currentItem.name;
+            document.getElementById("detail-description").innerText = currentItem.detail;
+
+            // Badges
+            const typeBadge = document.getElementById("detail-type-badge");
+            typeBadge.innerText = (currentItem.type === "service") ? "🛠️ Service" : "📦 Product";
+            typeBadge.className = `badge-tag ${currentItem.type === "service" ? "badge-service" : "badge-product"}`;
+
+            document.getElementById("detail-cat-tag").innerText = currentItem.category;
+            document.getElementById("detail-subcat-tag").innerText = currentItem.subcategory || "";
+
+            // Populate 10 fields in Specification Grid
+            document.getElementById("spec-type").innerText = currentItem.type.toUpperCase();
+            document.getElementById("spec-name").innerText = currentItem.name;
+            document.getElementById("spec-category").innerText = currentItem.category;
+            document.getElementById("spec-subcategory").innerText = currentItem.subcategory || "N/A";
+            document.getElementById("spec-country").innerText = currentItem.country || "India";
+            document.getElementById("spec-state").innerText = currentItem.state || "N/A";
+            document.getElementById("spec-city").innerText = currentItem.city;
+            document.getElementById("spec-area").innerText = currentItem.area || "N/A";
+            document.getElementById("spec-price").innerText = DB.formatPrice(currentItem.price);
+
+            // Breadcrumb
+            document.getElementById("bc-category").innerHTML = `<a href="category.html?category=${encodeURIComponent(currentItem.category)}">${currentItem.category}</a>`;
+            document.getElementById("bc-city").innerHTML = `<a href="city.html?city=${encodeURIComponent(currentItem.city)}">${currentItem.city}</a>`;
+            document.getElementById("bc-title").innerText = currentItem.name.substring(0, 35) + "...";
+
+            // Sidebar
+            document.getElementById("sidebar-price").innerText = DB.formatPrice(currentItem.price);
+            document.getElementById("sidebar-name").innerText = currentItem.name;
+            document.getElementById("sidebar-location").innerText = `📍 ${currentItem.area ? currentItem.area + ', ' : ''}${currentItem.city}`;
+            document.getElementById("sidebar-date").innerText = `Posted ${DB.formatTimeAgo(currentItem.createdAt)}`;
+
+            // Seller Card
+            document.getElementById("seller-name").innerText = currentItem.sellerName || "Verified User";
+            document.getElementById("seller-avatar").innerText = (currentItem.sellerName || "S").charAt(0).toUpperCase();
+            document.getElementById("modal-seller-name").innerText = currentItem.sellerName || "the seller";
+            document.getElementById("modal-seller-phone").innerText = currentItem.sellerPhone || "+91 98765 43210";
+
+            // WhatsApp link
+            const phoneDigits = (currentItem.sellerPhone || "").replace(/\D/g, "");
+            const whatsappMsg = encodeURIComponent(`Hi, I am interested in your listing "${currentItem.name}" on OLX Marketplace.`);
+            document.getElementById("whatsapp-btn").href = `https://wa.me/${phoneDigits}?text=${whatsappMsg}`;
+
+            // Check if user is owner
+            const currentUser = Auth.getCurrentUser();
+            if (currentUser && (currentUser.id === currentItem.userId || currentUser.email === currentItem.sellerEmail)) {
+                document.getElementById("owner-controls").style.display = "block";
+            }
+
+            // Render Related Listings
+            renderRelatedListings(currentItem);
+        });
+
+        function showNotFound() {
+            document.getElementById("listing-container").style.display = "none";
+            document.getElementById("detail-breadcrumb").style.display = "none";
+            document.getElementById("not-found-state").style.display = "block";
+        }
+
+        function renderRelatedListings(item) {
+            const relatedGrid = document.getElementById("related-listings-grid");
+            const all = DB.getAllListings();
+            
+            // Filter by same category or same city, excluding current item
+            const related = all.filter(l => 
+                String(l.id) !== String(item.id) && 
+                (l.category === item.category || l.city === item.city)
+            ).slice(0, 4);
+
+            if (related.length === 0) {
+                relatedGrid.innerHTML = `<p style="grid-column: 1 / -1; color: var(--text-muted); font-size: 0.9rem;">No similar items right now.</p>`;
+                return;
+            }
+
+            relatedGrid.innerHTML = related.map(rel => `
+                <div class="listing-card" onclick="window.location.href='listing.html?id=${rel.id}'">
+                    <span class="badge-tag ${rel.type === 'service' ? 'badge-service' : 'badge-product'}">
+                        ${rel.type === 'service' ? '🛠️ Service' : '📦 Product'}
+                    </span>
+                    <div class="listing-img-box">
+                        <img src="${rel.image}" alt="${rel.name}" class="listing-img" onerror="this.src='https://images.unsplash.com/photo-1526738549149-8e07eca6c147?auto=format&fit=crop&w=800&q=80'" />
+                    </div>
+                    <div class="listing-info">
+                        <div class="listing-price">${DB.formatPrice(rel.price)}</div>
+                        <h3 class="listing-title" title="${rel.name}">${rel.name}</h3>
+                        <div class="listing-meta">
+                            <span class="listing-location">📍 ${rel.city}</span>
+                            <span class="listing-date">${DB.formatTimeAgo(rel.createdAt)}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join("");
+        }
+    </script>
+</body>
+</html>

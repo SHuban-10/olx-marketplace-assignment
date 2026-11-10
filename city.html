@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>City Wise Listings - OLX Marketplace</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .city-hero {
+            background: linear-gradient(135deg, #002f34 0%, #004d54 100%);
+            color: #ffffff;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+        .city-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 0.85rem;
+            margin-top: 1.25rem;
+        }
+        .city-box {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--radius-md);
+            padding: 0.85rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #fff;
+        }
+        .city-box:hover, .city-box.active {
+            background: #ffffff;
+            color: var(--primary-color);
+            border-color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        .city-box-name {
+            font-weight: 800;
+            font-size: 1rem;
+        }
+        .city-box-count {
+            font-size: 0.75rem;
+            opacity: 0.8;
+            margin-top: 0.2rem;
+        }
+        .city-box.active .city-box-count {
+            color: var(--accent-teal);
+            font-weight: 700;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Main Navigation Bar -->
+    <header id="main-header"></header>
+
+    <!-- City Selector Hero -->
+    <section class="city-hero">
+        <div class="container">
+            <span class="hero-badge">ASSESSMENT REQUIREMENT 4.b: CITY WISE LISTING</span>
+            <h1 style="font-size: 1.8rem; font-weight: 800; margin-top: 0.35rem;">
+                Explore Listings by City
+            </h1>
+            <p style="color: #e0f2f1; font-size: 0.95rem;">
+                Select your city to find second-hand products, real estate, and local home services nearby
+            </p>
+
+            <!-- Popular Cities Grid -->
+            <div class="city-grid" id="city-selector-grid">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
+    </section>
+
+    <main class="container" style="padding-bottom: 3rem;">
+        
+        <!-- Active City Header & Filter Panel -->
+        <div class="filter-panel">
+            <div class="section-header" style="margin-bottom: 1rem;">
+                <div>
+                    <h2 class="section-title" id="active-city-title">Listings in Mumbai</h2>
+                    <p style="font-size: 0.85rem; color: var(--text-muted);" id="active-city-subtitle">
+                        Showing all available ads posted in Mumbai
+                    </p>
+                </div>
+                <span id="city-listing-count" style="font-weight: 700; color: var(--accent-teal);">
+                    0 Ads Found
+                </span>
+            </div>
+
+            <div class="filter-grid">
+                <div class="filter-group">
+                    <label class="filter-label">Filter by Locality / Area</label>
+                    <select id="area-filter-select" class="filter-select" onchange="applyFilters()">
+                        <option value="">All Areas</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">Category</label>
+                    <select id="city-cat-select" class="filter-select" onchange="applyFilters()">
+                        <option value="">All Categories</option>
+                        <!-- Populated dynamically -->
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">Sort Order</label>
+                    <select id="city-sort-select" class="filter-select" onchange="applyFilters()">
+                        <option value="newest">Latest First</option>
+                        <option value="price-low">Price: Low to High</option>
+                        <option value="price-high">Price: High to Low</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">Search in this city</label>
+                    <input type="text" id="city-search-input" class="filter-input" placeholder="Search item or service..." oninput="applyFilters()" />
+                </div>
+            </div>
+        </div>
+
+        <!-- City Wise Listings Grid (Requirement 4.b) -->
+        <div class="listings-grid" id="city-listings-grid">
+            <!-- Listings injected here -->
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer id="main-footer"></footer>
+
+    <!-- Scripts -->
+    <script src="js/data.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/navbar.js"></script>
+    <script>
+        const POPULAR_CITIES = ["All Cities", "Mumbai", "Delhi", "Bengaluru", "Hyderabad", "Pune", "Chennai", "Kolkata"];
+        let currentCity = "Mumbai";
+
+        function renderCityBoxes() {
+            const container = document.getElementById("city-selector-grid");
+            const allListings = DB.getAllListings();
+
+            let html = "";
+            POPULAR_CITIES.forEach(c => {
+                const count = (c === "All Cities") 
+                    ? allListings.length 
+                    : allListings.filter(l => (l.city || "").toLowerCase() === c.toLowerCase()).length;
+                
+                const isActive = (currentCity.toLowerCase() === c.toLowerCase()) ? 'active' : '';
+                html += `
+                    <div class="city-box ${isActive}" onclick="selectCity('${c}')">
+                        <div class="city-box-name">📍 ${c}</div>
+                        <div class="city-box-count">${count} listings</div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function initCategoryFilter() {
+            const catSelect = document.getElementById("city-cat-select");
+            catSelect.innerHTML = `<option value="">All Categories</option>`;
+            for (const catName of Object.keys(CATEGORIES_DATA)) {
+                const opt = document.createElement("option");
+                opt.value = catName;
+                opt.textContent = `${CATEGORIES_DATA[catName].icon} ${catName}`;
+                catSelect.appendChild(opt);
+            }
+        }
+
+        function updateAreaFilter() {
+            const areaSelect = document.getElementById("area-filter-select");
+            areaSelect.innerHTML = `<option value="">All Areas</option>`;
+
+            if (currentCity === "All Cities") return;
+
+            // Find areas from LOCATIONS_DATA or from existing listings in this city
+            const listings = DB.getAllListings().filter(l => (l.city || "").toLowerCase() === currentCity.toLowerCase());
+            const areas = new Set();
+            listings.forEach(l => {
+                if (l.area) areas.add(l.area);
+            });
+
+            areas.forEach(a => {
+                const opt = document.createElement("option");
+                opt.value = a;
+                opt.textContent = a;
+                areaSelect.appendChild(opt);
+            });
+        }
+
+        function selectCity(city) {
+            currentCity = city;
+            renderCityBoxes();
+            updateAreaFilter();
+            
+            const titleEl = document.getElementById("active-city-title");
+            const subtitleEl = document.getElementById("active-city-subtitle");
+            
+            if (city === "All Cities") {
+                titleEl.innerText = "All Cities Across India";
+                subtitleEl.innerText = "Showing all products and services available nationally";
+            } else {
+                titleEl.innerText = `Listings in ${city}`;
+                subtitleEl.innerText = `Showing all products and services currently active in ${city}`;
+            }
+
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const areaVal = document.getElementById("area-filter-select").value;
+            const catVal = document.getElementById("city-cat-select").value;
+            const sortVal = document.getElementById("city-sort-select").value;
+            const queryVal = document.getElementById("city-search-input").value;
+
+            const filters = {
+                city: currentCity === "All Cities" ? "" : currentCity,
+                category: catVal,
+                sort: sortVal,
+                query: queryVal
+            };
+
+            let results = DB.filterListings(filters);
+
+            if (areaVal) {
+                results = results.filter(l => (l.area || "").toLowerCase() === areaVal.toLowerCase());
+            }
+
+            renderListings(results);
+        }
+
+        function renderListings(items) {
+            const grid = document.getElementById("city-listings-grid");
+            const countEl = document.getElementById("city-listing-count");
+            countEl.innerText = `${items.length} Ad${items.length === 1 ? '' : 's'} Found`;
+
+            if (items.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1 / -1;">
+                        <div class="empty-icon">📍</div>
+                        <h3 class="empty-title">No listings found in ${currentCity}</h3>
+                        <p class="empty-desc">There are no items matching this filter yet.</p>
+                        <a href="post-ad.html" class="btn btn-primary">+ Post First Ad in ${currentCity}</a>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = items.map(item => `
+                <div class="listing-card" onclick="window.location.href='listing.html?id=${item.id}'">
+                    <span class="badge-tag ${item.type === 'service' ? 'badge-service' : 'badge-product'}">
+                        ${item.type === 'service' ? '🛠️ Service' : '📦 Product'}
+                    </span>
+                    <div class="listing-img-box">
+                        <img src="${item.image}" alt="${item.name}" class="listing-img" onerror="this.src='https://images.unsplash.com/photo-1526738549149-8e07eca6c147?auto=format&fit=crop&w=800&q=80'" />
+                    </div>
+                    <div class="listing-info">
+                        <div class="listing-price">${DB.formatPrice(item.price)}</div>
+                        <h3 class="listing-title" title="${item.name}">${item.name}</h3>
+                        <div class="listing-tags">
+                            <span class="tag-pill">${item.category}</span>
+                            ${item.subcategory ? `<span class="tag-pill">${item.subcategory}</span>` : ''}
+                        </div>
+                        <div class="listing-meta">
+                            <span class="listing-location">📍 ${item.area ? item.area + ', ' : ''}${item.city}</span>
+                            <span class="listing-date">${DB.formatTimeAgo(item.createdAt)}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join("");
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const cityParam = urlParams.get("city");
+
+            if (cityParam) {
+                currentCity = cityParam;
+            }
+
+            initCategoryFilter();
+            renderCityBoxes();
+            selectCity(currentCity);
+        });
+    </script>
+</body>
+</html>

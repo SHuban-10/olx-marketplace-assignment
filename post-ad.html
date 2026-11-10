@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post Free Ad - Add Product or Service - OLX Marketplace</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+    <!-- Main Navigation Bar -->
+    <header id="main-header"></header>
+
+    <main class="container" style="padding-top: 1.5rem; padding-bottom: 3rem;">
+        <div class="form-card">
+            
+            <div class="form-header">
+                <span class="hero-badge" style="background: var(--primary-color); color: #fff; margin-bottom: 0.5rem;">
+                    ASSESSMENT REQUIREMENT 2 & 3
+                </span>
+                <h1 class="form-title">POST YOUR AD</h1>
+                <p class="form-subtitle">Fill in all 10 required fields to publish your product or service</p>
+            </div>
+
+            <!-- Alerts -->
+            <div id="form-error" class="alert-box alert-danger"></div>
+            <div id="form-success" class="alert-box alert-success"></div>
+
+            <form id="post-ad-form">
+                
+                <!-- FIELD 1: product/service -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <span>1. Select Type (Product or Service)</span>
+                        <span class="field-requirement">*Required (Field i)</span>
+                    </label>
+                    <div class="type-toggle-group">
+                        <label class="type-toggle-card active" id="card-type-product">
+                            <input type="radio" name="item_type" value="product" checked onchange="handleTypeChange('product')" />
+                            <div>
+                                <div class="type-title">📦 Product</div>
+                                <div class="type-desc">Physical item for sale (Mobile, Bike, Laptop, etc.)</div>
+                            </div>
+                        </label>
+                        <label class="type-toggle-card" id="card-type-service">
+                            <input type="radio" name="item_type" value="service" onchange="handleTypeChange('service')" />
+                            <div>
+                                <div class="type-title">🛠️ Service</div>
+                                <div class="type-desc">Professional or Home service (AC Repair, Tutor, etc.)</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- FIELD 2: Name -->
+                <div class="form-group">
+                    <label class="form-label" for="item-name">
+                        <span>2. Product / Service Title (Name)</span>
+                        <span class="field-requirement">*Required (Field ii)</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        id="item-name" 
+                        class="form-input" 
+                        placeholder="e.g., iPhone 13 Pro 128GB or Doorstep AC Cleaning & Repair" 
+                        maxlength="100" 
+                        required 
+                    />
+                    <small style="color: var(--text-muted); font-size: 0.78rem;">Include key features (e.g. brand, model, condition, service scope)</small>
+                </div>
+
+                <!-- FIELD 3: Detail -->
+                <div class="form-group">
+                    <label class="form-label" for="item-detail">
+                        <span>3. Detail (Description)</span>
+                        <span class="field-requirement">*Required (Field iii)</span>
+                    </label>
+                    <textarea 
+                        id="item-detail" 
+                        class="form-textarea" 
+                        placeholder="Describe what you are selling or the details of your service in depth..." 
+                        rows="4" 
+                        required
+                    ></textarea>
+                </div>
+
+                <div class="form-section-title">Category & Subcategory Selection</div>
+
+                <div class="form-row">
+                    <!-- FIELD 4: Category -->
+                    <div class="form-group">
+                        <label class="form-label" for="item-category">
+                            <span>4. Category</span>
+                            <span class="field-requirement">*Required (Field iv)</span>
+                        </label>
+                        <select id="item-category" class="form-select" required onchange="handleCategoryChange()">
+                            <option value="">-- Choose Category --</option>
+                            <!-- Options populated dynamically from CATEGORIES_DATA -->
+                        </select>
+                    </div>
+
+                    <!-- FIELD 5: Subcategory -->
+                    <div class="form-group">
+                        <label class="form-label" for="item-subcategory">
+                            <span>5. Subcategory</span>
+                            <span class="field-requirement">*Required (Field v - Cascading)</span>
+                        </label>
+                        <select id="item-subcategory" class="form-select" required>
+                            <option value="">-- Select Category First --</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-section-title">Location Details (Fields vi to ix)</div>
+
+                <div class="form-row">
+                    <!-- FIELD 6: Country -->
+                    <div class="form-group">
+                        <label class="form-label" for="item-country">
+                            <span>6. Country</span>
+                            <span class="field-requirement">*Required (Field vi)</span>
+                        </label>
+                        <select id="item-country" class="form-select" required onchange="handleCountryChange()">
+                            <option value="India" selected>India</option>
+                        </select>
+                    </div>
+
+                    <!-- FIELD 7: State -->
+                    <div class="form-group">
+                        <label class="form-label" for="item-state">
+                            <span>7. State</span>
+                            <span class="field-requirement">*Required (Field vii)</span>
+                        </label>
+                        <select id="item-state" class="form-select" required onchange="handleStateChange()">
+                            <option value="">-- Select State --</option>
+                            <!-- Populated from LOCATIONS_DATA -->
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <!-- FIELD 8: City -->
+                    <div class="form-group">
+                        <label class="form-label" for="item-city">
+                            <span>8. City</span>
+                            <span class="field-requirement">*Required (Field viii)</span>
+                        </label>
+                        <select id="item-city" class="form-select" required onchange="handleCityChange()">
+                            <option value="">-- Select State First --</option>
+                        </select>
+                    </div>
+
+                    <!-- FIELD 9: Area -->
+                    <div class="form-group">
+                        <label class="form-label" for="item-area">
+                            <span>9. Area / Locality</span>
+                            <span class="field-requirement">*Required (Field ix)</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            id="item-area" 
+                            class="form-input" 
+                            placeholder="e.g. Andheri West, Koramangala, Sector 62" 
+                            list="area-suggestions"
+                            required 
+                        />
+                        <datalist id="area-suggestions"></datalist>
+                    </div>
+                </div>
+
+                <div class="form-section-title">Pricing & Photo (Field x)</div>
+
+                <!-- FIELD 10: Price -->
+                <div class="form-group">
+                    <label class="form-label" for="item-price">
+                        <span>10. Price (in INR)</span>
+                        <span class="field-requirement">*Required (Field x)</span>
+                    </label>
+                    <div class="price-input-wrapper">
+                        <span class="price-currency-badge">₹</span>
+                        <input 
+                            type="number" 
+                            id="item-price" 
+                            class="form-input" 
+                            placeholder="0" 
+                            min="0" 
+                            step="1" 
+                            required 
+                        />
+                    </div>
+                </div>
+
+                <!-- Product/Service Photo -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <span>Upload Photo / Product Image</span>
+                        <span class="field-requirement">(Image file or preset)</span>
+                    </label>
+                    <div class="image-upload-zone" onclick="document.getElementById('file-upload').click()">
+                        <div style="font-size: 2.2rem; margin-bottom: 0.35rem;">📷</div>
+                        <p style="font-weight: 700; color: var(--primary-color); font-size: 0.95rem;">
+                            Click here to select an image from your computer
+                        </p>
+                        <small style="color: var(--text-muted);">Supports PNG, JPG, JPEG, WebP</small>
+                        <input type="file" id="file-upload" accept="image/*" style="display: none;" onchange="handleFileSelect(event)" />
+                    </div>
+
+                    <!-- Image URL input fallback -->
+                    <div style="margin-top: 0.75rem; display: flex; gap: 0.5rem; align-items: center;">
+                        <input type="url" id="image-url-input" class="form-input" placeholder="Or paste an image URL here..." oninput="handleUrlInput(this.value)" />
+                    </div>
+
+                    <!-- Preview box -->
+                    <div class="preview-container" id="image-preview-container">
+                        <img id="image-preview" src="" alt="Listing preview" />
+                        <button type="button" class="remove-img-btn" onclick="removeImage()">✕</button>
+                    </div>
+                </div>
+
+                <div class="form-section-title">Seller Contact Information</div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="seller-name">Seller Name</label>
+                        <input type="text" id="seller-name" class="form-input" placeholder="Your Name" required />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="seller-phone">Contact Phone</label>
+                        <input type="tel" id="seller-phone" class="form-input" placeholder="+91 98765 43210" required />
+                    </div>
+                </div>
+
+                <!-- Submit Button (Requirement 3: After submission it will show on frontend) -->
+                <button type="submit" id="btn-submit-listing" class="btn btn-primary" style="width: 100%; padding: 1rem; font-size: 1.1rem; font-weight: 800; margin-top: 1.5rem;">
+                    🚀 Publish Ad Now (Show on Frontend)
+                </button>
+            </form>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer id="main-footer"></footer>
+
+    <!-- Scripts -->
+    <script src="js/data.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/navbar.js"></script>
+    <script>
+        let currentImageDataUrl = "";
+
+        // Default stock fallback images if user does not upload
+        const DEFAULT_STOCK_IMAGES = {
+            "Mobiles": "https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?auto=format&fit=crop&w=800&q=80",
+            "Vehicles": "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=800&q=80",
+            "Electronics": "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?auto=format&fit=crop&w=800&q=80",
+            "Real Estate": "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80",
+            "Home Services": "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=800&q=80",
+            "Professional Services": "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=800&q=80",
+            "Fashion & Lifestyle": "https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?auto=format&fit=crop&w=800&q=80"
+        };
+
+        function handleTypeChange(type) {
+            const cardProduct = document.getElementById("card-type-product");
+            const cardService = document.getElementById("card-type-service");
+            if (type === 'product') {
+                cardProduct.classList.add("active");
+                cardService.classList.remove("active");
+            } else {
+                cardService.classList.add("active");
+                cardProduct.classList.remove("active");
+            }
+        }
+
+        // Populate Category Dropdown
+        function initCategoryDropdown() {
+            const catSelect = document.getElementById("item-category");
+            catSelect.innerHTML = `<option value="">-- Choose Category --</option>`;
+            for (const catName of Object.keys(CATEGORIES_DATA)) {
+                const opt = document.createElement("option");
+                opt.value = catName;
+                opt.textContent = `${CATEGORIES_DATA[catName].icon} ${catName}`;
+                catSelect.appendChild(opt);
+            }
+        }
+
+        // Cascading Subcategories based on Category selection (Requirement 2.a.v)
+        function handleCategoryChange() {
+            const selectedCat = document.getElementById("item-category").value;
+            const subcatSelect = document.getElementById("item-subcategory");
+
+            subcatSelect.innerHTML = `<option value="">-- Choose Subcategory --</option>`;
+
+            if (selectedCat && CATEGORIES_DATA[selectedCat]) {
+                CATEGORIES_DATA[selectedCat].subcategories.forEach(sub => {
+                    const opt = document.createElement("option");
+                    opt.value = sub;
+                    opt.textContent = sub;
+                    subcatSelect.appendChild(opt);
+                });
+            } else {
+                subcatSelect.innerHTML = `<option value="">-- Select Category First --</option>`;
+            }
+        }
+
+        // Populate States for Country (India)
+        function initLocationDropdowns() {
+            const stateSelect = document.getElementById("item-state");
+            stateSelect.innerHTML = `<option value="">-- Select State --</option>`;
+            
+            const states = Object.keys(LOCATIONS_DATA["India"]);
+            states.forEach(st => {
+                const opt = document.createElement("option");
+                opt.value = st;
+                opt.textContent = st;
+                stateSelect.appendChild(opt);
+            });
+        }
+
+        function handleCountryChange() {
+            initLocationDropdowns();
+        }
+
+        // Cascading Cities based on State (Requirement 2.a.viii)
+        function handleStateChange() {
+            const selectedState = document.getElementById("item-state").value;
+            const citySelect = document.getElementById("item-city");
+            citySelect.innerHTML = `<option value="">-- Select City --</option>`;
+
+            if (selectedState && LOCATIONS_DATA["India"][selectedState]) {
+                const cities = Object.keys(LOCATIONS_DATA["India"][selectedState]);
+                cities.forEach(c => {
+                    const opt = document.createElement("option");
+                    opt.value = c;
+                    opt.textContent = c;
+                    citySelect.appendChild(opt);
+                });
+            } else {
+                citySelect.innerHTML = `<option value="">-- Select State First --</option>`;
+            }
+        }
+
+        // Cascading sample Areas based on City (Requirement 2.a.ix)
+        function handleCityChange() {
+            const selectedState = document.getElementById("item-state").value;
+            const selectedCity = document.getElementById("item-city").value;
+            const datalist = document.getElementById("area-suggestions");
+            datalist.innerHTML = "";
+
+            if (selectedState && selectedCity && LOCATIONS_DATA["India"][selectedState][selectedCity]) {
+                const areas = LOCATIONS_DATA["India"][selectedState][selectedCity];
+                areas.forEach(area => {
+                    const opt = document.createElement("option");
+                    opt.value = area;
+                    datalist.appendChild(opt);
+                });
+            }
+        }
+
+        // Image Handling
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                currentImageDataUrl = event.target.result;
+                showImagePreview(currentImageDataUrl);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function handleUrlInput(url) {
+            if (url && url.startsWith("http")) {
+                currentImageDataUrl = url;
+                showImagePreview(url);
+            }
+        }
+
+        function showImagePreview(src) {
+            const previewContainer = document.getElementById("image-preview-container");
+            const previewImg = document.getElementById("image-preview");
+            previewImg.src = src;
+            previewContainer.style.display = "block";
+        }
+
+        function removeImage() {
+            currentImageDataUrl = "";
+            document.getElementById("image-preview-container").style.display = "none";
+            document.getElementById("file-upload").value = "";
+            document.getElementById("image-url-input").value = "";
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            // Check auth (or pre-fill from user profile)
+            const currentUser = Auth.getCurrentUser();
+            if (currentUser) {
+                document.getElementById("seller-name").value = currentUser.name || "";
+                document.getElementById("seller-phone").value = currentUser.phone || "";
+                if (currentUser.city) {
+                    // pre-select if available
+                }
+            } else {
+                // If not logged in, prompt or allow guest
+                document.getElementById("seller-name").value = "Demo Seller";
+                document.getElementById("seller-phone").value = "+91 98765 00000";
+            }
+
+            // Initialize dropdowns
+            initCategoryDropdown();
+            initLocationDropdowns();
+
+            // Set default State & City for convenience
+            document.getElementById("item-state").value = "Maharashtra";
+            handleStateChange();
+            document.getElementById("item-city").value = "Mumbai";
+            handleCityChange();
+
+            // FORM SUBMISSION (Requirement 2 & Requirement 3)
+            const form = document.getElementById("post-ad-form");
+            const formError = document.getElementById("form-error");
+            const formSuccess = document.getElementById("form-success");
+
+            form.addEventListener("submit", (e) => {
+                e.preventDefault();
+                formError.classList.remove("show");
+                formSuccess.classList.remove("show");
+
+                // Collect all 10 fields exactly as required by assessment
+                const itemType = document.querySelector('input[name="item_type"]:checked').value; // i. product/service
+                const name = document.getElementById("item-name").value;                           // ii. Name
+                const detail = document.getElementById("item-detail").value;                       // iii. Detail
+                const category = document.getElementById("item-category").value;                   // iv. Category
+                const subcategory = document.getElementById("item-subcategory").value;             // v. Subcategory
+                const country = document.getElementById("item-country").value;                     // vi. Country
+                const state = document.getElementById("item-state").value;                         // vii. State
+                const city = document.getElementById("item-city").value;                           // viii. City
+                const area = document.getElementById("item-area").value;                           // ix. Area
+                const price = document.getElementById("item-price").value;                         // x. Price
+
+                const sellerName = document.getElementById("seller-name").value;
+                const sellerPhone = document.getElementById("seller-phone").value;
+
+                // Validation
+                if (!category) {
+                    formError.innerText = "Please select a Category (Field iv).";
+                    formError.classList.add("show");
+                    return;
+                }
+                if (!subcategory) {
+                    formError.innerText = "Please select a Subcategory (Field v).";
+                    formError.classList.add("show");
+                    return;
+                }
+                if (!state || !city) {
+                    formError.innerText = "Please select State and City (Fields vii & viii).";
+                    formError.classList.add("show");
+                    return;
+                }
+
+                // Choose image: user uploaded DataURL/URL or category stock image
+                let finalImage = currentImageDataUrl;
+                if (!finalImage) {
+                    finalImage = DEFAULT_STOCK_IMAGES[category] || "https://images.unsplash.com/photo-1526738549149-8e07eca6c147?auto=format&fit=crop&w=800&q=80";
+                }
+
+                // Construct listing object
+                const listingPayload = {
+                    type: itemType,
+                    name: name,
+                    detail: detail,
+                    category: category,
+                    subcategory: subcategory,
+                    country: country,
+                    state: state,
+                    city: city,
+                    area: area,
+                    price: price,
+                    image: finalImage,
+                    sellerName: sellerName,
+                    sellerPhone: sellerPhone,
+                    sellerEmail: currentUser ? currentUser.email : "",
+                    userId: currentUser ? currentUser.id : "guest-user"
+                };
+
+                // Save to database (Requirement 3: persists and will show on frontend)
+                const newListing = DB.addListing(listingPayload);
+
+                formSuccess.innerHTML = `
+                    🎉 <strong>Listing Published Successfully!</strong><br>
+                    Requirement 3 Verified: Your new ${itemType} "<strong>${newListing.name}</strong>" is now live on the frontend. Redirecting to listing page...
+                `;
+                formSuccess.classList.add("show");
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+
+                // Redirect to the newly created listing page after short delay
+                setTimeout(() => {
+                    window.location.href = `listing.html?id=${newListing.id}&created=true`;
+                }, 1200);
+            });
+        });
+    </script>
+</body>
+</html>

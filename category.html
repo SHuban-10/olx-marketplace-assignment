@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browse Categories - OLX Marketplace</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .category-nav-bar {
+            background: #fff;
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 0;
+            margin-bottom: 1.5rem;
+        }
+        .cat-pills-scroll {
+            display: flex;
+            gap: 0.65rem;
+            overflow-x: auto;
+            padding-bottom: 0.25rem;
+        }
+        .cat-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.5rem 1rem;
+            background: #f1f4f5;
+            border: 1.5px solid transparent;
+            border-radius: var(--radius-full);
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text-main);
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .cat-pill:hover {
+            border-color: var(--accent-teal);
+            background: #f0fdfc;
+        }
+        .cat-pill.active {
+            background: var(--primary-color);
+            color: #ffffff;
+            border-color: var(--primary-color);
+        }
+        .subcat-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 1rem 0 1.5rem;
+            padding: 0.85rem;
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+        }
+        .subcat-pill {
+            padding: 0.35rem 0.75rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            font-weight: 600;
+            background: #f8fafb;
+            color: var(--text-muted);
+            border: 1px solid #e1e7ea;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .subcat-pill:hover, .subcat-pill.active {
+            background: var(--accent-teal);
+            color: #ffffff;
+            border-color: var(--accent-teal);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Main Navigation Bar -->
+    <header id="main-header"></header>
+
+    <div class="category-nav-bar">
+        <div class="container">
+            <div style="margin-bottom: 0.75rem; display: flex; align-items: center; justify-content: space-between;">
+                <span class="hero-badge" style="background: var(--primary-color); color: #fff;">
+                    ASSESSMENT REQUIREMENT 4.a: CATEGORY PAGE
+                </span>
+                <span id="category-listing-count" style="font-size: 0.88rem; color: var(--text-muted); font-weight: 600;">
+                    0 Listings Found
+                </span>
+            </div>
+            
+            <!-- Horizontal Category Selector Pills -->
+            <div class="cat-pills-scroll" id="cat-pills-container">
+                <button class="cat-pill active" onclick="selectCategory('All')">
+                    ✨ All Categories
+                </button>
+                <!-- Populated via JS -->
+            </div>
+        </div>
+    </div>
+
+    <main class="container" style="padding-bottom: 3rem;">
+        
+        <!-- Subcategories bar (shown when a specific category is chosen) -->
+        <div id="subcat-container" style="display: none;">
+            <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.35rem;">
+                Filter by Subcategory:
+            </div>
+            <div class="subcat-pills" id="subcat-pills-box"></div>
+        </div>
+
+        <!-- Filter & Sort Bar -->
+        <div class="filter-panel">
+            <div class="filter-grid">
+                <div class="filter-group">
+                    <label class="filter-label">Listing Type</label>
+                    <select id="type-filter" class="filter-select" onchange="applyFilters()">
+                        <option value="all">All (Products & Services)</option>
+                        <option value="product">📦 Products Only</option>
+                        <option value="service">🛠️ Services Only</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">Sort By</label>
+                    <select id="sort-filter" class="filter-select" onchange="applyFilters()">
+                        <option value="newest">Newly Listed First</option>
+                        <option value="price-low">Price: Low to High</option>
+                        <option value="price-high">Price: High to Low</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">Quick Search in Category</label>
+                    <input type="text" id="cat-search-input" class="filter-input" placeholder="Keyword, brand or model..." oninput="applyFilters()" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Listings Grid (Requirement 4.a) -->
+        <div class="listings-grid" id="category-listings-grid">
+            <!-- Listings rendered here -->
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer id="main-footer"></footer>
+
+    <!-- Scripts -->
+    <script src="js/data.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/navbar.js"></script>
+    <script>
+        let selectedCategory = "All";
+        let selectedSubcategory = "All";
+
+        function renderCategoryPills() {
+            const container = document.getElementById("cat-pills-container");
+            let html = `<button class="cat-pill ${selectedCategory === 'All' ? 'active' : ''}" onclick="selectCategory('All')">✨ All Categories</button>`;
+            
+            for (const [catName, catData] of Object.entries(CATEGORIES_DATA)) {
+                const isActive = (selectedCategory === catName) ? 'active' : '';
+                html += `
+                    <button class="cat-pill ${isActive}" onclick="selectCategory('${catName}')">
+                        ${catData.icon} ${catName}
+                    </button>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        function renderSubcategories() {
+            const subcatContainer = document.getElementById("subcat-container");
+            const subcatBox = document.getElementById("subcat-pills-box");
+
+            if (selectedCategory === "All" || !CATEGORIES_DATA[selectedCategory]) {
+                subcatContainer.style.display = "none";
+                return;
+            }
+
+            subcatContainer.style.display = "block";
+            const subs = CATEGORIES_DATA[selectedCategory].subcategories;
+            
+            let html = `
+                <button class="subcat-pill ${selectedSubcategory === 'All' ? 'active' : ''}" onclick="selectSubcategory('All')">
+                    All ${selectedCategory}
+                </button>
+            `;
+
+            subs.forEach(sub => {
+                const isActive = (selectedSubcategory === sub) ? 'active' : '';
+                html += `
+                    <button class="subcat-pill ${isActive}" onclick="selectSubcategory('${sub}')">
+                        ${sub}
+                    </button>
+                `;
+            });
+
+            subcatBox.innerHTML = html;
+        }
+
+        function selectCategory(catName) {
+            selectedCategory = catName;
+            selectedSubcategory = "All";
+            renderCategoryPills();
+            renderSubcategories();
+            applyFilters();
+        }
+
+        function selectSubcategory(subName) {
+            selectedSubcategory = subName;
+            renderSubcategories();
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const typeVal = document.getElementById("type-filter").value;
+            const sortVal = document.getElementById("sort-filter").value;
+            const queryVal = document.getElementById("cat-search-input").value;
+
+            const filters = {
+                category: selectedCategory === "All" ? "" : selectedCategory,
+                subcategory: selectedSubcategory === "All" ? "" : selectedSubcategory,
+                type: typeVal,
+                sort: sortVal,
+                query: queryVal
+            };
+
+            const results = DB.filterListings(filters);
+            renderListings(results);
+        }
+
+        function renderListings(items) {
+            const grid = document.getElementById("category-listings-grid");
+            const countEl = document.getElementById("category-listing-count");
+            countEl.innerText = `${items.length} Listing${items.length === 1 ? '' : 's'} Found`;
+
+            if (items.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1 / -1;">
+                        <div class="empty-icon">🔍</div>
+                        <h3 class="empty-title">No listings found in ${selectedCategory}</h3>
+                        <p class="empty-desc">Try clearing your filters or be the first to post a listing here!</p>
+                        <a href="post-ad.html" class="btn btn-primary">+ Post Ad in this Category</a>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = items.map(item => `
+                <div class="listing-card" onclick="window.location.href='listing.html?id=${item.id}'">
+                    <span class="badge-tag ${item.type === 'service' ? 'badge-service' : 'badge-product'}">
+                        ${item.type === 'service' ? '🛠️ Service' : '📦 Product'}
+                    </span>
+                    <div class="listing-img-box">
+                        <img src="${item.image}" alt="${item.name}" class="listing-img" onerror="this.src='https://images.unsplash.com/photo-1526738549149-8e07eca6c147?auto=format&fit=crop&w=800&q=80'" />
+                    </div>
+                    <div class="listing-info">
+                        <div class="listing-price">${DB.formatPrice(item.price)}</div>
+                        <h3 class="listing-title" title="${item.name}">${item.name}</h3>
+                        <div class="listing-tags">
+                            <span class="tag-pill">${item.category}</span>
+                            ${item.subcategory ? `<span class="tag-pill">${item.subcategory}</span>` : ''}
+                        </div>
+                        <div class="listing-meta">
+                            <span class="listing-location">📍 ${item.area ? item.area + ', ' : ''}${item.city}</span>
+                            <span class="listing-date">${DB.formatTimeAgo(item.createdAt)}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join("");
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const catParam = urlParams.get("category");
+            const subParam = urlParams.get("subcategory");
+
+            if (catParam && CATEGORIES_DATA[catParam]) {
+                selectedCategory = catParam;
+            }
+            if (subParam) {
+                selectedSubcategory = subParam;
+            }
+
+            renderCategoryPills();
+            renderSubcategories();
+            applyFilters();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Registration & Login - OLX Marketplace</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .auth-container {
+            max-width: 520px;
+            margin: 2.5rem auto;
+        }
+        .auth-tabs {
+            display: flex;
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 1.5rem;
+        }
+        .auth-tab {
+            flex: 1;
+            text-align: center;
+            padding: 0.85rem;
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+        }
+        .auth-tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+        .demo-login-box {
+            background-color: #f0f7f8;
+            border: 1px dashed var(--accent-teal);
+            border-radius: var(--radius-sm);
+            padding: 0.85rem 1rem;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Main Navigation Bar -->
+    <header id="main-header"></header>
+
+    <main class="container">
+        <div class="auth-container">
+            <div class="form-card">
+                
+                <!-- Notice Banner if redirected from Post Ad -->
+                <div id="auth-notice" class="alert-box alert-info">
+                    🔒 Please log in or register to post your ad on OLX Marketplace.
+                </div>
+
+                <!-- Alert Messages -->
+                <div id="alert-error" class="alert-box alert-danger"></div>
+                <div id="alert-success" class="alert-box alert-success"></div>
+
+                <!-- If already logged in: Profile Box -->
+                <div id="logged-in-box" style="display: none; text-align: center; padding: 1.5rem 0;">
+                    <div class="seller-avatar" style="width: 70px; height: 70px; font-size: 2rem; margin: 0 auto 1rem;">
+                        <span id="profile-initial">U</span>
+                    </div>
+                    <h2 id="profile-name" style="font-size: 1.4rem; color: var(--primary-color);">Welcome Back!</h2>
+                    <p id="profile-email" style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;"></p>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem; max-width: 300px; margin: 0 auto;">
+                        <a href="post-ad.html" class="btn btn-primary" style="padding: 0.75rem;">+ Post Product / Service</a>
+                        <a href="my-listings.html" class="btn btn-outline" style="padding: 0.75rem;">View My Listings</a>
+                        <button onclick="Auth.logout()" class="btn btn-outline text-danger" style="padding: 0.75rem;">Sign Out</button>
+                    </div>
+                </div>
+
+                <!-- Auth Forms Box -->
+                <div id="auth-forms-container">
+                    
+                    <!-- Tab Switcher: Register vs Login -->
+                    <div class="auth-tabs">
+                        <div class="auth-tab active" id="tab-register" onclick="switchTab('register')">
+                            1. Register New User
+                        </div>
+                        <div class="auth-tab" id="tab-login" onclick="switchTab('login')">
+                            Login
+                        </div>
+                    </div>
+
+                    <!-- Quick Demo Credentials Banner for Assessor -->
+                    <div class="demo-login-box">
+                        <div>
+                            <strong>Test Assessor Account:</strong><br>
+                            <span style="color: var(--text-muted);">demo@olx.com | password123</span>
+                        </div>
+                        <button type="button" class="btn btn-accent" style="padding: 0.35rem 0.65rem; font-size: 0.78rem;" onclick="fillDemoCredentials()">
+                            Quick Fill
+                        </button>
+                    </div>
+
+                    <!-- 1. REGISTRATION FORM (Requirement 1) -->
+                    <form id="register-form">
+                        <div class="form-group">
+                            <label class="form-label" for="reg-name">
+                                Full Name <span class="field-requirement">*Required</span>
+                            </label>
+                            <input type="text" id="reg-name" class="form-input" placeholder="e.g. Rahul Sharma" required />
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="reg-email">
+                                Email Address <span class="field-requirement">*Required</span>
+                            </label>
+                            <input type="email" id="reg-email" class="form-input" placeholder="name@example.com" required />
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="reg-phone">Phone Number</label>
+                                <input type="tel" id="reg-phone" class="form-input" placeholder="+91 98765 43210" required />
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="reg-city">City</label>
+                                <select id="reg-city" class="form-select" required>
+                                    <option value="Mumbai">Mumbai</option>
+                                    <option value="Delhi">Delhi</option>
+                                    <option value="Bengaluru">Bengaluru</option>
+                                    <option value="Hyderabad">Hyderabad</option>
+                                    <option value="Pune">Pune</option>
+                                    <option value="Chennai">Chennai</option>
+                                    <option value="Kolkata">Kolkata</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="reg-password">
+                                Password <span class="field-requirement">(Min 6 characters)</span>
+                            </label>
+                            <input type="password" id="reg-password" class="form-input" placeholder="Create a password" required minlength="6" />
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.85rem; font-size: 1rem; margin-top: 0.5rem;">
+                            Create Free Account
+                        </button>
+                    </form>
+
+                    <!-- 2. LOGIN FORM -->
+                    <form id="login-form" style="display: none;">
+                        <div class="form-group">
+                            <label class="form-label" for="login-email">Email Address</label>
+                            <input type="email" id="login-email" class="form-input" placeholder="name@example.com" required />
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="login-password">Password</label>
+                            <input type="password" id="login-password" class="form-input" placeholder="Enter your password" required />
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.85rem; font-size: 1rem; margin-top: 0.5rem;">
+                            Log In to Account
+                        </button>
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer id="main-footer"></footer>
+
+    <!-- Scripts -->
+    <script src="js/data.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/navbar.js"></script>
+    <script>
+        const tabRegister = document.getElementById("tab-register");
+        const tabLogin = document.getElementById("tab-login");
+        const formRegister = document.getElementById("register-form");
+        const formLogin = document.getElementById("login-form");
+        const alertError = document.getElementById("alert-error");
+        const alertSuccess = document.getElementById("alert-success");
+        const authNotice = document.getElementById("auth-notice");
+
+        function switchTab(mode) {
+            clearAlerts();
+            if (mode === 'login') {
+                tabLogin.classList.add("active");
+                tabRegister.classList.remove("active");
+                formLogin.style.display = "block";
+                formRegister.style.display = "none";
+            } else {
+                tabRegister.classList.add("active");
+                tabLogin.classList.remove("active");
+                formRegister.style.display = "block";
+                formLogin.style.display = "none";
+            }
+        }
+
+        function clearAlerts() {
+            alertError.classList.remove("show");
+            alertError.innerText = "";
+            alertSuccess.classList.remove("show");
+            alertSuccess.innerText = "";
+        }
+
+        function showError(msg) {
+            alertError.innerText = msg;
+            alertError.classList.add("show");
+            alertSuccess.classList.remove("show");
+        }
+
+        function showSuccess(msg) {
+            alertSuccess.innerText = msg;
+            alertSuccess.classList.add("show");
+            alertError.classList.remove("show");
+        }
+
+        function fillDemoCredentials() {
+            switchTab('login');
+            document.getElementById("login-email").value = "demo@olx.com";
+            document.getElementById("login-password").value = "password123";
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const mode = urlParams.get("mode");
+            const notice = urlParams.get("notice");
+
+            if (notice === "auth_required") {
+                authNotice.classList.add("show");
+            }
+
+            if (mode === "login") {
+                switchTab("login");
+            }
+
+            // Check if user is already logged in
+            const currentUser = Auth.getCurrentUser();
+            if (currentUser) {
+                document.getElementById("logged-in-box").style.display = "block";
+                document.getElementById("auth-forms-container").style.display = "none";
+                document.getElementById("profile-name").innerText = `Welcome, ${currentUser.name}!`;
+                document.getElementById("profile-email").innerText = `${currentUser.email} • ${currentUser.city || 'India'}`;
+                document.getElementById("profile-initial").innerText = currentUser.name.charAt(0).toUpperCase();
+                return;
+            }
+
+            // Handle Registration Form Submit (Requirement 1)
+            formRegister.addEventListener("submit", (e) => {
+                e.preventDefault();
+                clearAlerts();
+
+                const userData = {
+                    name: document.getElementById("reg-name").value,
+                    email: document.getElementById("reg-email").value,
+                    phone: document.getElementById("reg-phone").value,
+                    city: document.getElementById("reg-city").value,
+                    password: document.getElementById("reg-password").value
+                };
+
+                const res = Auth.register(userData);
+                if (res.success) {
+                    showSuccess(`Account created successfully! Welcome, ${res.user.name}. Redirecting...`);
+                    setTimeout(() => {
+                        const redirectUrl = sessionStorage.getItem("olx_redirect_after_login") || "index.html";
+                        sessionStorage.removeItem("olx_redirect_after_login");
+                        window.location.href = redirectUrl;
+                    }, 1200);
+                } else {
+                    showError(res.message);
+                }
+            });
+
+            // Handle Login Form Submit
+            formLogin.addEventListener("submit", (e) => {
+                e.preventDefault();
+                clearAlerts();
+
+                const email = document.getElementById("login-email").value;
+                const password = document.getElementById("login-password").value;
+
+                const res = Auth.login(email, password);
+                if (res.success) {
+                    showSuccess(`Logged in successfully! Welcome back, ${res.user.name}. Redirecting...`);
+                    setTimeout(() => {
+                        const redirectUrl = sessionStorage.getItem("olx_redirect_after_login") || "index.html";
+                        sessionStorage.removeItem("olx_redirect_after_login");
+                        window.location.href = redirectUrl;
+                    }, 1000);
+                } else {
+                    showError(res.message);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

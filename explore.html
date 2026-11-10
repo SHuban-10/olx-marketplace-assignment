@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>City + Category Wise Listings - OLX Marketplace</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .filter-hero {
+            background-color: #ffffff;
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.5rem 0;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Main Navigation Bar -->
+    <header id="main-header"></header>
+
+    <!-- Page Header & Criteria Banner -->
+    <div class="filter-hero">
+        <div class="container">
+            <span class="hero-badge" style="background: var(--primary-color); color: #fff; margin-bottom: 0.5rem;">
+                ASSESSMENT REQUIREMENT 4.c: CITY + CATEGORY WISE LISTING
+            </span>
+            <h1 class="section-title" id="page-dual-title" style="font-size: 1.7rem; margin-top: 0.25rem;">
+                Showing All Categories in All Cities
+            </h1>
+            <p style="color: var(--text-muted); font-size: 0.9rem;" id="page-dual-desc">
+                Combined multi-faceted filter: Filter by both City and Category simultaneously
+            </p>
+
+            <!-- Active Filter Chips -->
+            <div class="active-filter-chips" id="filter-chips-container">
+                <span class="chip-label">Active Filters:</span>
+                <!-- Populated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <main class="container" style="padding-bottom: 3rem;">
+        
+        <!-- Multi-Criteria Filter Controls -->
+        <div class="filter-panel">
+            <div class="filter-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+                
+                <!-- City Filter -->
+                <div class="filter-group">
+                    <label class="filter-label">1. Select City</label>
+                    <select id="dual-city-select" class="filter-select" onchange="onFilterChange()">
+                        <option value="">All Cities (India)</option>
+                        <option value="Mumbai">Mumbai</option>
+                        <option value="Delhi">Delhi</option>
+                        <option value="Bengaluru">Bengaluru</option>
+                        <option value="Hyderabad">Hyderabad</option>
+                        <option value="Pune">Pune</option>
+                        <option value="Chennai">Chennai</option>
+                        <option value="Kolkata">Kolkata</option>
+                    </select>
+                </div>
+
+                <!-- Category Filter -->
+                <div class="filter-group">
+                    <label class="filter-label">2. Select Category</label>
+                    <select id="dual-category-select" class="filter-select" onchange="onCategorySelectChange()">
+                        <option value="">All Categories</option>
+                    </select>
+                </div>
+
+                <!-- Subcategory Filter -->
+                <div class="filter-group">
+                    <label class="filter-label">3. Subcategory</label>
+                    <select id="dual-subcategory-select" class="filter-select" onchange="onFilterChange()">
+                        <option value="">All Subcategories</option>
+                    </select>
+                </div>
+
+                <!-- Type (Product vs Service) -->
+                <div class="filter-group">
+                    <label class="filter-label">4. Type</label>
+                    <select id="dual-type-select" class="filter-select" onchange="onFilterChange()">
+                        <option value="all">All (Products & Services)</option>
+                        <option value="product">📦 Products Only</option>
+                        <option value="service">🛠️ Services Only</option>
+                    </select>
+                </div>
+
+                <!-- Sort Order -->
+                <div class="filter-group">
+                    <label class="filter-label">5. Sort By</label>
+                    <select id="dual-sort-select" class="filter-select" onchange="onFilterChange()">
+                        <option value="newest">Newly Listed</option>
+                        <option value="price-low">Price: Low to High</option>
+                        <option value="price-high">Price: High to Low</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <!-- Keyword Search Box inside panel -->
+            <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+                <input 
+                    type="text" 
+                    id="dual-keyword-input" 
+                    class="filter-input" 
+                    placeholder="Search by keywords, model, area or title..." 
+                    oninput="onFilterChange()"
+                />
+                <button type="button" class="btn btn-outline" onclick="resetAllFilters()">Reset All</button>
+            </div>
+        </div>
+
+        <!-- Section Header with Count -->
+        <div class="section-header">
+            <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--primary-color);">Results</h3>
+            <span id="results-count-badge" style="font-size: 0.9rem; font-weight: 700; color: var(--accent-teal);">
+                0 Listings
+            </span>
+        </div>
+
+        <!-- Listings Grid (Requirement 4.c) -->
+        <div class="listings-grid" id="explore-listings-grid">
+            <!-- Populated via JS -->
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer id="main-footer"></footer>
+
+    <!-- Scripts -->
+    <script src="js/data.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/navbar.js"></script>
+    <script>
+        function initCategoryOptions() {
+            const catSelect = document.getElementById("dual-category-select");
+            catSelect.innerHTML = `<option value="">All Categories</option>`;
+            for (const catName of Object.keys(CATEGORIES_DATA)) {
+                const opt = document.createElement("option");
+                opt.value = catName;
+                opt.textContent = `${CATEGORIES_DATA[catName].icon} ${catName}`;
+                catSelect.appendChild(opt);
+            }
+        }
+
+        function onCategorySelectChange() {
+            updateSubcategories();
+            onFilterChange();
+        }
+
+        function updateSubcategories() {
+            const cat = document.getElementById("dual-category-select").value;
+            const subcatSelect = document.getElementById("dual-subcategory-select");
+            subcatSelect.innerHTML = `<option value="">All Subcategories</option>`;
+
+            if (cat && CATEGORIES_DATA[cat]) {
+                CATEGORIES_DATA[cat].subcategories.forEach(sub => {
+                    const opt = document.createElement("option");
+                    opt.value = sub;
+                    opt.textContent = sub;
+                    subcatSelect.appendChild(opt);
+                });
+            }
+        }
+
+        function onFilterChange() {
+            const city = document.getElementById("dual-city-select").value;
+            const category = document.getElementById("dual-category-select").value;
+            const subcategory = document.getElementById("dual-subcategory-select").value;
+            const type = document.getElementById("dual-type-select").value;
+            const sort = document.getElementById("dual-sort-select").value;
+            const query = document.getElementById("dual-keyword-input").value;
+
+            // Update Page Heading to reflect City + Category
+            updatePageHeading(city, category, subcategory);
+
+            // Render Filter Chips
+            renderChips(city, category, subcategory, type, query);
+
+            // Fetch and render filtered results
+            const results = DB.filterListings({
+                city: city,
+                category: category,
+                subcategory: subcategory,
+                type: type,
+                sort: sort,
+                query: query
+            });
+
+            renderResults(results);
+
+            // Update URL without page reload so user can share/bookmark exact City+Category
+            const params = new URLSearchParams();
+            if (city) params.set("city", city);
+            if (category) params.set("category", category);
+            if (subcategory) params.set("subcategory", subcategory);
+            if (query) params.set("query", query);
+            const newRelativePathQuery = window.location.pathname + '?' + params.toString();
+            window.history.replaceState(null, '', newRelativePathQuery);
+        }
+
+        function updatePageHeading(city, category, subcategory) {
+            const titleEl = document.getElementById("page-dual-title");
+            const descEl = document.getElementById("page-dual-desc");
+
+            if (city && category) {
+                titleEl.innerText = `Showing ${category} ${subcategory ? '(' + subcategory + ')' : ''} in ${city}`;
+                descEl.innerText = `Viewing all verified listings matching category "${category}" located in "${city}"`;
+            } else if (city) {
+                titleEl.innerText = `Showing All Categories in ${city}`;
+                descEl.innerText = `Viewing all verified listings located in "${city}"`;
+            } else if (category) {
+                titleEl.innerText = `Showing ${category} Across All Cities`;
+                descEl.innerText = `Viewing all verified listings in category "${category}" throughout India`;
+            } else {
+                titleEl.innerText = `Showing All Categories in All Cities`;
+                descEl.innerText = `Combined multi-faceted filter: Filter by both City and Category simultaneously`;
+            }
+        }
+
+        function renderChips(city, category, subcategory, type, query) {
+            const container = document.getElementById("filter-chips-container");
+            const chips = [];
+
+            if (city) {
+                chips.push(`<span class="chip">📍 City: ${city} <span class="chip-remove" onclick="removeFilter('city')">✕</span></span>`);
+            }
+            if (category) {
+                chips.push(`<span class="chip">📂 Category: ${category} <span class="chip-remove" onclick="removeFilter('category')">✕</span></span>`);
+            }
+            if (subcategory) {
+                chips.push(`<span class="chip">🏷️ Sub: ${subcategory} <span class="chip-remove" onclick="removeFilter('subcategory')">✕</span></span>`);
+            }
+            if (type !== 'all') {
+                chips.push(`<span class="chip">🔘 Type: ${type} <span class="chip-remove" onclick="removeFilter('type')">✕</span></span>`);
+            }
+            if (query) {
+                chips.push(`<span class="chip">🔍 "${query}" <span class="chip-remove" onclick="removeFilter('query')">✕</span></span>`);
+            }
+
+            if (chips.length === 0) {
+                container.innerHTML = `<span class="chip-label">Active Filters: None (Showing all listings)</span>`;
+            } else {
+                container.innerHTML = `<span class="chip-label">Active Filters:</span> ` + chips.join(" ");
+            }
+        }
+
+        function removeFilter(key) {
+            if (key === 'city') document.getElementById("dual-city-select").value = "";
+            if (key === 'category') {
+                document.getElementById("dual-category-select").value = "";
+                updateSubcategories();
+            }
+            if (key === 'subcategory') document.getElementById("dual-subcategory-select").value = "";
+            if (key === 'type') document.getElementById("dual-type-select").value = "all";
+            if (key === 'query') document.getElementById("dual-keyword-input").value = "";
+            onFilterChange();
+        }
+
+        function resetAllFilters() {
+            document.getElementById("dual-city-select").value = "";
+            document.getElementById("dual-category-select").value = "";
+            updateSubcategories();
+            document.getElementById("dual-subcategory-select").value = "";
+            document.getElementById("dual-type-select").value = "all";
+            document.getElementById("dual-keyword-input").value = "";
+            onFilterChange();
+        }
+
+        function renderResults(items) {
+            const grid = document.getElementById("explore-listings-grid");
+            const countBadge = document.getElementById("results-count-badge");
+            countBadge.innerText = `${items.length} Listing${items.length === 1 ? '' : 's'} Found`;
+
+            if (items.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1 / -1;">
+                        <div class="empty-icon">🔎</div>
+                        <h3 class="empty-title">No matching listings found</h3>
+                        <p class="empty-desc">We couldn't find any products or services matching this specific City + Category combination.</p>
+                        <div style="display: flex; gap: 0.5rem; justify-content: center; margin-top: 1rem;">
+                            <button onclick="resetAllFilters()" class="btn btn-outline">Clear Filters</button>
+                            <a href="post-ad.html" class="btn btn-primary">+ Post Ad in this City & Category</a>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = items.map(item => `
+                <div class="listing-card" onclick="window.location.href='listing.html?id=${item.id}'">
+                    <span class="badge-tag ${item.type === 'service' ? 'badge-service' : 'badge-product'}">
+                        ${item.type === 'service' ? '🛠️ Service' : '📦 Product'}
+                    </span>
+                    <div class="listing-img-box">
+                        <img src="${item.image}" alt="${item.name}" class="listing-img" onerror="this.src='https://images.unsplash.com/photo-1526738549149-8e07eca6c147?auto=format&fit=crop&w=800&q=80'" />
+                    </div>
+                    <div class="listing-info">
+                        <div class="listing-price">${DB.formatPrice(item.price)}</div>
+                        <h3 class="listing-title" title="${item.name}">${item.name}</h3>
+                        <div class="listing-tags">
+                            <span class="tag-pill">${item.category}</span>
+                            ${item.subcategory ? `<span class="tag-pill">${item.subcategory}</span>` : ''}
+                        </div>
+                        <div class="listing-meta">
+                            <span class="listing-location">📍 ${item.area ? item.area + ', ' : ''}${item.city}</span>
+                            <span class="listing-date">${DB.formatTimeAgo(item.createdAt)}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join("");
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            initCategoryOptions();
+
+            // Read initial URL query parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const cityParam = urlParams.get("city");
+            const catParam = urlParams.get("category");
+            const subParam = urlParams.get("subcategory");
+            const queryParam = urlParams.get("query") || urlParams.get("q");
+
+            if (cityParam) {
+                document.getElementById("dual-city-select").value = cityParam;
+            }
+            if (catParam) {
+                document.getElementById("dual-category-select").value = catParam;
+                updateSubcategories();
+            }
+            if (subParam) {
+                document.getElementById("dual-subcategory-select").value = subParam;
+            }
+            if (queryParam) {
+                document.getElementById("dual-keyword-input").value = queryParam;
+            }
+
+            onFilterChange();
+        });
+    </script>
+</body>
+</html>

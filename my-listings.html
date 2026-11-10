@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Listings - OLX Marketplace</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .my-ad-item {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            margin-bottom: 1rem;
+            transition: box-shadow 0.2s;
+        }
+        .my-ad-item:hover {
+            box-shadow: var(--shadow-sm);
+        }
+        .my-ad-img {
+            width: 110px;
+            height: 90px;
+            object-fit: cover;
+            border-radius: var(--radius-sm);
+        }
+        .my-ad-details {
+            flex: 1;
+        }
+        .my-ad-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.25rem;
+        }
+        .my-ad-price {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--accent-teal);
+            margin-bottom: 0.35rem;
+        }
+        .my-ad-meta {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        .my-ad-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Main Navigation Bar -->
+    <header id="main-header"></header>
+
+    <main class="container" style="padding-top: 2rem; padding-bottom: 3rem;">
+        
+        <div class="section-header">
+            <div>
+                <h1 class="section-title">My Published Listings</h1>
+                <p style="color: var(--text-muted); font-size: 0.9rem;" id="user-info-text">
+                    Manage the products and services you have posted on OLX Marketplace
+                </p>
+            </div>
+            <a href="post-ad.html" class="btn btn-primary">+ Post New Ad</a>
+        </div>
+
+        <div id="my-listings-list" style="margin-top: 1.5rem;">
+            <!-- Populated via JS -->
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer id="main-footer"></footer>
+
+    <!-- Scripts -->
+    <script src="js/data.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/navbar.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const currentUser = Auth.getCurrentUser();
+            const container = document.getElementById("my-listings-list");
+            const infoText = document.getElementById("user-info-text");
+
+            const allListings = DB.getAllListings();
+            let userAds = [];
+
+            if (currentUser) {
+                infoText.innerText = `Logged in as ${currentUser.name} (${currentUser.email})`;
+                userAds = allListings.filter(l => 
+                    l.userId === currentUser.id || 
+                    l.sellerEmail === currentUser.email ||
+                    l.sellerName === currentUser.name
+                );
+            } else {
+                infoText.innerHTML = `You are not logged in. Showing recently added ads in your browser session. <a href="register.html?mode=login" style="text-decoration: underline; color: var(--accent-teal);">Log in to sync account</a>`;
+                userAds = allListings.slice(0, 3); // show top 3 for demo preview
+            }
+
+            if (userAds.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📦</div>
+                        <h3 class="empty-title">You haven't posted any ads yet</h3>
+                        <p class="empty-desc">Post a product for sale or offer your local service on OLX Marketplace!</p>
+                        <a href="post-ad.html" class="btn btn-primary" style="margin-top: 0.5rem;">+ Post Your First Ad</a>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = userAds.map(item => `
+                <div class="my-ad-item">
+                    <img src="${item.image}" alt="${item.name}" class="my-ad-img" onerror="this.src='https://images.unsplash.com/photo-1526738549149-8e07eca6c147?auto=format&fit=crop&w=800&q=80'" />
+                    <div class="my-ad-details">
+                        <span class="badge-tag ${item.type === 'service' ? 'badge-service' : 'badge-product'}" style="position: static; display: inline-block; margin-bottom: 0.35rem;">
+                            ${item.type.toUpperCase()}
+                        </span>
+                        <h3 class="my-ad-title">${item.name}</h3>
+                        <div class="my-ad-price">${DB.formatPrice(item.price)}</div>
+                        <div class="my-ad-meta">
+                            📂 ${item.category} • 📍 ${item.area ? item.area + ', ' : ''}${item.city} • Posted ${DB.formatTimeAgo(item.createdAt)}
+                        </div>
+                    </div>
+                    <div class="my-ad-actions">
+                        <a href="listing.html?id=${item.id}" class="btn btn-outline" style="padding: 0.45rem 0.85rem;">View Ad</a>
+                        <button onclick="handleDelete('${item.id}')" class="btn btn-outline text-danger" style="padding: 0.45rem 0.85rem;">Delete</button>
+                    </div>
+                </div>
+            `).join("");
+        });
+
+        function handleDelete(id) {
+            if (confirm("Are you sure you want to delete this listing?")) {
+                DB.deleteListing(id);
+                window.location.reload();
+            }
+        }
+    </script>
+</body>
+</html>
